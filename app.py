@@ -8,7 +8,7 @@ from branca.element import MacroElement
 from jinja2 import Template
 
 # إعداد الصفحة لتكون واسعة ومتوافقة مع الجوال
-st.set_page_config(page_title="خريطة المسيلة الصحية", page_icon="🗺️", layout="wide", initial_sidebar_state="auto")
+st.set_page_config(page_title="الخريطة الصحية - د. عليلي صابر", page_icon="🗺️", layout="wide", initial_sidebar_state="auto")
 
 # ==========================================
 # إعدادات الـ CSS والطباعة الاحترافية (إخفاء كل شيء ما عدا الخريطة)
@@ -69,7 +69,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🗺️ الخريطة الصحية لولاية المسيلة")
+# ==========================================
+# العنوان الجديد المخصص (مع اسم المطور)
+# ==========================================
+st.markdown("""
+    <div style="direction: rtl; text-align: right; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">
+        <h2 style="margin-bottom: 5px; color: #1a237e; font-size: 32px; font-weight: 900;">🗺️ الخريطة الصحية لولاية المسيلة</h2>
+        <p style="margin-top: 0px; font-size: 16px; color: #666; font-weight: bold;">(تطوير الدكتور عليلي صابر)</p>
+    </div>
+""", unsafe_allow_html=True)
 
 # ==========================================
 # قاموس الألوان والنظام
@@ -263,6 +271,7 @@ with tab_manage:
                 new_lat = st.number_input("خط العرض:", value=marker['lat'], format="%.6f", key=f"lat_{i}")
                 new_lon = st.number_input("خط الطول:", value=marker['lon'], format="%.6f", key=f"lon_{i}")
                 
+                # الحفظ التلقائي عند التعديل
                 marker.update({
                     "type": new_type, "name_ar": new_name_ar, "name_fr": new_name_fr,
                     "lat": new_lat, "lon": new_lon, "text_x": new_text_x, "text_y": new_text_y,
@@ -480,12 +489,10 @@ for marker in st.session_state.markers:
 # ==========================================
 map_data = st_folium(m, use_container_width=True, height=700, returned_objects=["zoom", "center"])
 
-# إذا قام المستخدم بتحريك الخريطة، سيظهر شريط الحفظ في الأسفل ولن يحفظ تلقائياً
 if map_data and map_data.get("zoom") is not None and map_data.get("center") is not None:
     current_zoom = map_data["zoom"]
     current_center = [map_data["center"]["lat"], map_data["center"]["lng"]]
     
-    # تقريب الأرقام العشرية لتفادي ظهور الزر بسبب اهتزازات بسيطة جداً
     c_lat = round(current_center[0], 4)
     c_lng = round(current_center[1], 4)
     s_lat = round(saved_center[0], 4)
