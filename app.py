@@ -63,7 +63,7 @@ st.markdown("""
             border: none !important;
         }
         
-        /* 4. (هام جداً) إخفاء أزرار التحكم في الخريطة (Zoom +/-) وحقوق النشر */
+        /* 4. إخفاء أزرار التحكم في الخريطة (Zoom +/-) وحقوق النشر */
         .leaflet-control-container, .leaflet-top, .leaflet-bottom { display: none !important; }
     }
     </style>
@@ -263,7 +263,6 @@ with tab_manage:
                 new_lat = st.number_input("خط العرض:", value=marker['lat'], format="%.6f", key=f"lat_{i}")
                 new_lon = st.number_input("خط الطول:", value=marker['lon'], format="%.6f", key=f"lon_{i}")
                 
-                # الحفظ التلقائي عند التعديل
                 marker.update({
                     "type": new_type, "name_ar": new_name_ar, "name_fr": new_name_fr,
                     "lat": new_lat, "lon": new_lon, "text_x": new_text_x, "text_y": new_text_y,
@@ -278,11 +277,10 @@ with tab_manage:
                     st.rerun()
 
 # ------------------------------------------
-# 4. تبويب تصدير وطباعة الخريطة (تم التحديث: PDF فقط)
+# 4. تبويب تصدير وطباعة الخريطة (PDF فقط)
 # ------------------------------------------
 with tab_export:
     st.markdown("#### 📤 تصدير الخريطة")
-    # تم حذف خيار PNG، والإبقاء فقط على خيار الطباعة PDF مع العنوان
     components.html("""
         <script>
             function printWithTitle() {
@@ -342,14 +340,13 @@ with tab_export:
         </button>
         
         <div style="margin-top: 15px; font-family: Arial; font-size: 13px; color: #555; text-align: center; direction: rtl;">
-            💡 <b>نصيحة هامة:</b> للحصول على خريطة نقية تماماً بدون أي حواف، في نافذة الطباعة اختر "Save as PDF" وتأكد من جعل الهوامش (Margins) <b>"بدون" (None)</b>.
+            💡 <b>نصيحة هامة:</b> للحصول على خريطة نقية تماماً، في نافذة الطباعة اختر "Save as PDF" وتأكد من جعل الهوامش (Margins) <b>"بدون" (None)</b>.
         </div>
     """, height=150)
 
 # ==========================================
 # 3. إعداد الخريطة ورسم البيانات
 # ==========================================
-# استرجاع إحداثيات وتكبير الخريطة من الذاكرة 
 saved_zoom = st.session_state.global_settings.get("map_zoom", 9)
 saved_center = st.session_state.global_settings.get("map_center", [35.3, 4.5])
 
@@ -362,12 +359,10 @@ m = folium.Map(
     zoom_delta=0.25
 )
 
-# نظام التكبير السلس الاحترافي (MacroElement)
 class DynamicScalePlugin(MacroElement):
     _template = Template("""
     {% macro script(this, kwargs) %}
     var map_instance = {{ this._parent.get_name() }};
-    
     function updateMarkerScale() {
         var current_zoom = map_instance.getZoom();
         var base_zoom = 9; 
@@ -375,7 +370,6 @@ class DynamicScalePlugin(MacroElement):
         scale = Math.max(0.3, Math.min(scale, 3.5));
         document.documentElement.style.setProperty('--marker-scale', scale);
     }
-
     map_instance.on('zoomend', updateMarkerScale);
     updateMarkerScale(); 
     {% endmacro %}
@@ -482,16 +476,28 @@ for marker in st.session_state.markers:
     ).add_to(m)
 
 # ==========================================
-# استشعار حركة الخريطة وحفظها التلقائي، وعرض متجاوب للشاشات
+# استشعار حركة الخريطة (نظام الحفظ اليدوي الذكي)
 # ==========================================
-# السر الأهم للجوال: use_container_width=True يجعل الخريطة تتمدد وتتقلص حسب الشاشة بدلاً من عرض ثابت
 map_data = st_folium(m, use_container_width=True, height=700, returned_objects=["zoom", "center"])
 
+# إذا قام المستخدم بتحريك الخريطة، سيظهر شريط الحفظ في الأسفل ولن يحفظ تلقائياً
 if map_data and map_data.get("zoom") is not None and map_data.get("center") is not None:
     current_zoom = map_data["zoom"]
     current_center = [map_data["center"]["lat"], map_data["center"]["lng"]]
     
-    if current_zoom != saved_zoom or current_center != saved_center:
-        st.session_state.global_settings["map_zoom"] = current_zoom
-        st.session_state.global_settings["map_center"] = current_center
-        save_data()
+    # تقريب الأرقام العشرية لتفادي ظهور الزر بسبب اهتزازات بسيطة جداً
+    c_lat = round(current_center[0], 4)
+    c_lng = round(current_center[1], 4)
+    s_lat = round(saved_center[0], 4)
+    s_lng = round(saved_center[1], 4)
+    
+    if current_zoom != saved_zoom or c_lat != s_lat or c_lng != s_lng:
+        st.markdown("---")
+        col1, col2 = st.columns([3, 1])
+        col1.info("📌 لقد قمت بتغيير موضع الخريطة أو التكبير. هل تريد حفظ هذا العرض ليكون الافتراضي دائماً؟")
+        if col2.button("💾 حفظ العرض الافتراضي", use_container_width=True):
+            st.session_state.global_settings["map_zoom"] = current_zoom
+            st.session_state.global_settings["map_center"] = current_center
+            save_data()
+            st.success("تم حفظ الموضع بنجاح!")
+            st.rerun()
