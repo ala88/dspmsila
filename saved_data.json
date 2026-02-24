@@ -1,0 +1,66 @@
+{
+    "markers": [
+        {
+            "type": "عيادة H24",
+            "name_ar": "",
+            "name_fr": "MAGRA",
+            "lat": 35.4056,
+            "lon": 4.5419,
+            "text_x": 0,
+            "text_y": 35,
+            "font_size": 10,
+            "name_color": "#d32f2f",
+            "label_size": 15,
+            "label_color": "#d32f2f"
+        },
+        {
+            "type": "عيادة H12",
+            "name_ar": "",
+            "name_fr": "OULED DERRADJ",
+            "lat": 35.7056,
+            "lon": 4.5419,
+            "text_x": 0,
+            "text_y": 35,
+            "font_size": 10,
+            "name_color": "#f57c00",
+            "label_size": 12,
+            "label_color": "#ec9b84"
+        },
+        {
+            "type": "مستشفى",
+            "name_ar": "",
+            "name_fr": "HOUAMED",
+            "lat": 35.1056,
+            "lon": 4.5419,
+            "text_x": 0,
+            "text_y": 35,
+            "font_size": 10,
+            "name_color": "#b71c1c",
+            "label_size": 15,
+            "label_color": "#b71c1c"
+        }
+    ],
+    "commune_styles": {
+        "برهوم": {
+            "color": "#c910c9",
+            "show_name": false,
+            "lang": "Français"
+        },
+        "المسيلة": {
+            "color": "#ea8be3",
+            "show_name": false,
+            "lang": "العربية"
+        }
+    },
+    "global_settings": {
+        "lang": "العربية",
+        "show_names": false,
+        "show_hospital_names": true,
+        "hospital_font_size": 10,
+        "map_zoom": 8.5,
+        "map_center": [
+            35.32421418098686,
+            4.323368377586539
+        ]
+    }
+}
